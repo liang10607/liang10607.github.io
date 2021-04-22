@@ -3,7 +3,7 @@
  刚开始建立这个博客，敬请继续关注
 
 ### 基础
-[Java基础](/base/java.md)
+[Java基础](/base/java_stuct.md)
 
 
 
