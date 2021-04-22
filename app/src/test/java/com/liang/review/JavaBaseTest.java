@@ -2,8 +2,8 @@ package com.liang.review;
 
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class JavaBaseTest {
 
@@ -18,7 +18,7 @@ public class JavaBaseTest {
         lmap.put("ff", 6);
         lmap.put("gg", 7);
         lmap.put("hh", 8);
-        for(Entry<String, Integer> entry : lmap.entrySet()) {
+        for(Map.Entry<String, Integer> entry : lmap.entrySet()) {
             System.out.println(entry.getKey() + ": " + entry.getValue());
         }
     }
