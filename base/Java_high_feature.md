@@ -1,3 +1,5 @@
+# Java高级特征
+
 # 泛型
 
 ## 简介
@@ -145,7 +147,111 @@ field.get(obj)
 假如有这样的需求，要在某些模块方法调用前后加上一些统一的前后处理操作，比如在添加购物车、修改订单等操作前后统一加上登陆验证与日志记录处理，该怎样实现？首先想到最简单的就是直接修改源码，在对应模块的对应方法前后添加操作。如果模块很多，你会发现，修改源码不仅非常麻烦、难以维护，而且会使代码显得十分臃肿。
 
 ## Java反射机制和动态代理
+在运行期动态创建一个interface实例的方法如下：
 
+* 定义一个InvocationHandler实例，它负责实现接口的方法调用；
+* 通过Proxy.newProxyInstance()创建interface实例，它需要3个参数：
+1. 使用的ClassLoader，通常就是接口类的ClassLoader；
+2. 需要实现的接口数组，至少需要传入一个接口进去；
+3. 用来处理接口方法调用的InvocationHandler实例。
+* 将返回的Object强制转型为接口
+```
+public class Main {
+    public static void main(String[] args) {
+        InvocationHandler handler = new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                System.out.println(method);
+                if (method.getName().equals("morning")) {
+                    System.out.println("Good morning, " + args[0]);
+                }
+                return null;
+            }
+        };
+        Hello hello = (Hello) Proxy.newProxyInstance(
+            Hello.class.getClassLoader(), // 传入ClassLoader
+            new Class[] { Hello.class }, // 传入要实现的接口
+            handler); // 传入处理调用方法的InvocationHandler
+        hello.morning("Bob");
+    }
+}
 
+interface Hello {
+    void morning(String name);
+}
+```
+
+## Java反射机制与泛型
+通过指定类对应的 Class 对象，可以获得该类里包含的所有 Field，不管该 Field 是使用 private 修饰，还是使用 public 修饰。获得了 Field 对象后，就可以很容易地获得该 Field 的数据类型，即使用如下代码即可获得指定 Field 的类型。
+
+// 获取 Field 对象 f 的类型
+```
+Class<?> a = f.getType();
+```
+但这种方式只对普通类型的 Field 有效。如果该 Field 的类型是有泛型限制的类型，如 Map<String, Integer> 类型，则不能准确地得到该 Field 的泛型参数。
+
+为了获得指定 Field 的泛型类型，应先使用如下方法来获取指定 Field 的类型。
+
+// 获得 Field 实例的泛型类型
+```
+Type type = f.getGenericType();
+```
+然后将 Type 对象强制类型转换为 ParameterizedType 对象，ParameterizedType 代表被参数化的类型，也就是增加了泛型限制的类型。ParameterizedType 类提供了如下两个方法。
+
+* getRawType()：返回没有泛型信息的原始类型。
+
+* getActualTypeArguments()：返回泛型参数的类型。
+
+下面是一个获取泛型类型的完整程序。
+```
+public class GenericTest
+{
+    private Map<String , Integer> score;
+    public static void main(String[] args)
+        throws Exception
+    {
+        Class<GenericTest> clazz = GenericTest.class;
+        Field f = clazz.getDeclaredField("score");
+        // 直接使用getType()取出Field类型只对普通类型的Field有效
+        Class<?> a = f.getType();
+        // 下面将看到仅输出java.util.Map
+        System.out.println("score的类型是:" + a);
+        // 获得Field实例f的泛型类型
+        Type gType = f.getGenericType();
+        // 如果gType类型是ParameterizedType对象
+        if(gType instanceof ParameterizedType)
+        {
+            // 强制类型转换
+            ParameterizedType pType = (ParameterizedType)gType;
+            // 获取原始类型
+            Type rType = pType.getRawType();
+            System.out.println("原始类型是：" + rType);
+            // 取得泛型类型的泛型参数
+            Type[] tArgs = pType.getActualTypeArguments();
+            System.out.println("泛型类型是:");
+            for (int i = 0; i < tArgs.length; i++) 
+            {
+                System.out.println("第" + i + "个泛型类型是：" + tArgs[i]);
+            }
+        }
+        else
+        {
+            System.out.println("获取泛型类型出错！");
+        }
+    }
+}
+```
+输出结果：
+
+score 的类型是: interface java.util.Map
+原始类型是: interface java.util.Map
+泛型类型是:
+第 0 个泛型类型是: class java.lang.String
+第 1 个泛型类型是：class java.lang.Integer
+
+从上面的运行结果可以看出，直接使用 Field 的 getType() 方法只能获取普通类型的 Field 的数据类型：对于增加了泛型参数的类型的 Field，应该使用 getGenericType() 方法来取得其类型。
+
+Type 也是 java.lang.reflect 包下的一个接口，该接口代表所有类型的公共高级接口，Class 是 Type 接口的实现类。Type 包括原始类型、参数化类型、数组类型、类型变量和基本类型等。
 
 # 注解
+### 待安排时间详细Review
