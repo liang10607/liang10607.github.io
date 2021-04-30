@@ -35,3 +35,112 @@ Buffer
 Channel
 Selector
 传统的IO操作面向数据流，意味着每次从流中读一个或多个字节，直至完成，数据没有被缓存在任何地方。NIO操作面向缓冲区，数据从Channel读取到Buffer缓冲区，随后在Buffer中处理数据。
+
+### 分配一个Buffer（Allocating a Buffer）
+为了获取一个Buffer对象，你必须先分配。每个Buffer实现类都有一个allocate()方法用于分配内存。下面看一个实例,开辟一个48字节大小的buffer：
+```
+ByteBuffer buf = ByteBuffer.allocate(48);
+```
+开辟一个1024个字符的CharBuffer：
+```
+CharBuffer buf = CharBuffer.allocate(1024);
+```
+### Buffer的实现类
+![avatar](/image/buffer_impl.png)
+
+## Channel的使用
+Java NIO Channel通道和流非常相似，主要有以下几点区别：
+
+* 通道可以读也可以写，流一般来说是单向的（只能读或者写）。
+* 通道可以异步读写。
+* 通道总是基于缓冲区Buffer来读写。
+* 正如上面提到的，我们可以从通道中读取数据，写入到buffer；也可以中buffer内读数据，写入到通道中。下面有个示意图：
+
+Channel的实现类有：
+* FileChannel
+* DatagramChannel
+* SocketChannel
+* ServerSocketChannel
+
+FileChannel用于文件的数据读写。 DatagramChannel用于UDP的数据读写。 SocketChannel用于TCP的数据读写。 ServerSocketChannel允许我们监听TCP链接请求，每个请求会创建会一个SocketChannel。
+Channel使用实例
+```
+RandomAccessFile aFile = new RandomAccessFile("data/nio-data.txt", "rw");
+    FileChannel inChannel = aFile.getChannel();
+
+    ByteBuffer buf = ByteBuffer.allocate(48);
+
+    int bytesRead = inChannel.read(buf);
+    while (bytesRead != -1) {
+
+      System.out.println("Read " + bytesRead);
+      buf.flip();
+
+      while(buf.hasRemaining()){
+          System.out.print((char) buf.get());
+      }
+
+      buf.clear();
+      bytesRead = inChannel.read(buf);
+    }
+    aFile.close();
+```
+
+### 阻塞/非阻塞/同步/非同步的关系
+
+### NIO中的blocking IO/nonblocking IO/IO multiplexing/asynchronous IO
+
+##  Selector使用
+Selector是Java NIO中的一个组件，用于检查一个或多个NIO Channel的状态是否处于可读、可写。如此可以实现单线程管理多个channels,也就是可以管理多个网络链接。Selector与Channel之间的关系图如下：
+![avatar](/image/java_selector.png)
+
+### Selector具体使用步骤
+1. 创建一个Selector可以通过Selector.open()方法：
+```
+Selector selector = Selector.open();
+```
+2. 注册Channel到Selector上：
+```
+channel.configureBlocking(false);
+SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+```
+3. Selector使用的完整案例如下代码：
+```
+Selector selector = Selector.open();
+
+channel.configureBlocking(false);
+
+SelectionKey key = channel.register(selector, SelectionKey.OP_READ);
+
+while(true) {
+
+  int readyChannels = selector.select();
+
+  if(readyChannels == 0) continue;
+
+  Set<SelectionKey> selectedKeys = selector.selectedKeys();
+
+  Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
+
+  while(keyIterator.hasNext()) {
+
+    SelectionKey key = keyIterator.next();
+
+    if(key.isAcceptable()) {
+        // a connection was accepted by a ServerSocketChannel.
+
+    } else if (key.isConnectable()) {
+        // a connection was established with a remote server.
+
+    } else if (key.isReadable()) {
+        // a channel is ready for reading
+
+    } else if (key.isWritable()) {
+        // a channel is ready for writing
+    }
+
+    keyIterator.remove();
+  }
+}
+```
+
