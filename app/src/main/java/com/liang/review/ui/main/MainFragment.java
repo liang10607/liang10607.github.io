@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.liang.review.R;
+import com.liang.review.beans.CloneTest;
 
 public class MainFragment extends Fragment {
 
@@ -26,6 +27,12 @@ public class MainFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        CloneTest cloneTest =new CloneTest();
+        try {
+            CloneTest ss= (CloneTest) cloneTest.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
         return inflater.inflate(R.layout.main_fragment, container, false);
     }
 
