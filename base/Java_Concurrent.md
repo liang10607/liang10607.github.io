@@ -13,7 +13,9 @@
 
  * （4）调用FutureTask对象的get()方法来获得子线程执行结束后的返回值，调用get()方法会阻塞线程。
  * Callable创建的线程核心代码如下：
+
 ```
+
 public class CallableThreadTest implements Callable<Integer> {
 
     @Override
@@ -25,12 +27,10 @@ public class CallableThreadTest implements Callable<Integer> {
         return i;
     }
 }
-
 CallableThreadTest ctt = new CallableThreadTest();
 FutureTask<Integer> ft = new FutureTask<>(ctt);
 new Thread(ft, "有返回值的线程").start();
  System.out.println("子线程的返回值：" + ft.get());
-
 ```
 
 ## Java线程池
@@ -60,6 +60,7 @@ new Thread(ft, "有返回值的线程").start();
 > 3. 由于任务队列已满，无法将任务插入到任务队列中。这个时候如果线程池中的线程数量没有达到线程池所设定的最大值，那么这时候就会立即启动一个非核心线程来执行任务。
 
 > 4. 如果线程池中的数量达到了所规定的最大值，那么就会拒绝执行此任务，这时候就会调用RejectedExecutionHandler中的rejectedExecution方法来通知调用者。
+
 ![avatar](/image/Thread_pool_flow.png)
 
 ### 四种线程池类
