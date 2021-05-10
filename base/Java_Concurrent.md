@@ -12,7 +12,9 @@
  * （3）使用FutureTask对象作为Thread对象的target创建并启动新线程。
 
  * （4）调用FutureTask对象的get()方法来获得子线程执行结束后的返回值，调用get()方法会阻塞线程。
- * Callable创建的线程核心代码如下：
+
+ Callable创建的线程核心代码如下：
+
 
 ```
 
