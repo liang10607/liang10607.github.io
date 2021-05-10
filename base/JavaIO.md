@@ -1,4 +1,4 @@
-[回目录页](/README.md)
+[回目录页](..)
 
 # Java IO和文件
 ## Java IO数据流

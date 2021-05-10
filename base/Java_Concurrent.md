@@ -42,9 +42,8 @@ new Thread(ft, "有返回值的线程").start();
 ### 线程池的使用
 * 现场池中，线程队列有四种，分别是
 
-
 | 阻塞队列 |	说明 |
-| --- |--- |
+| --- | --— |
 | ArrayBlockingQueue | 基于数组实现的有界的阻塞队列,该队列按照FIFO（先进先出）原则对队列中的元素进行排序。|
 |LinkedBlockingQueue	 | 基于链表实现的阻塞队列，该队列按照FIFO（先进先出）原则对队列中的元素进行排序。|
 |SynchronousQueue	 | 内部没有任何容量的阻塞队列。在它内部没有任何的缓存空间。对于SynchronousQueue中的数据元素只有当我们试着取走的时候才可能存在。|
@@ -68,6 +67,7 @@ new Thread(ft, "有返回值的线程").start();
 Java中四种具有不同功能常见的线程池。他们都是直接或者间接配置ThreadPoolExecutor来实现他们各自的功能。这四个线程池可以通过Executors类获取。
 这四种线程池分别是
 * newFixedThreadPool：所容纳最大的线程数就是我们设置的核心线程数，只有核心线程，并且这些线程都不会被回收，也就是它能够更快速的响应外界请求
+
 ```
 public static ExecutorService newFixedThreadPool(int nThreads) {
 	return new ThreadPoolExecutor(nThreads, nThreads,
@@ -75,7 +75,10 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
 		new LinkedBlockingQueue<Runnable>());
 }
 ```
+
 * newCachedThreadPool：核心线程数为0， 线程池的最大线程数Integer.MAX_VALUE；
+
+
 ```
 public static ExecutorService newCachedThreadPool() {
 	return new ThreadPoolExecutor(0, Integer.MAX_VALUE,
@@ -83,7 +86,10 @@ public static ExecutorService newCachedThreadPool() {
 		new SynchronousQueue<Runnable>());
 }
 ```
+
 * newScheduledThreadPool:它的核心线程数是固定的，对于非核心线程几乎可以说是没有限制的，并且当非核心线程处于限制状态的时候就会立即被回收.ScheduledExecutorService功能强大，对于定时执行的任务，建议多采用该方法
+
+
 ```
 public static ScheduledExecutorService newScheduledThreadPool(int corePoolSize) {
     return new ScheduledThreadPoolExecutor(corePoolSize);
@@ -93,8 +99,12 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
           new DelayedWorkQueue());
 }
 ```
+
 * newSingleThreadExecutor：在这个线程池中只有一个核心线程，对于任务队列没有大小限制，也就意味着这一个任务处于活动状态时，其他任务都会在任务队列中排队等候依次执行。
+
+
 ###  线程池的使用技巧
+
 |任务类别|说明|
 | --- | --- |
 | CPU密集型任务 | 	线程池中线程个数应尽量少，如配置N+1个线程的线程池。|
