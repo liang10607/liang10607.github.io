@@ -117,8 +117,50 @@ public ScheduledThreadPoolExecutor(int corePoolSize) {
 ### 线程池常见面试题
   待完善
 
-## Java死锁
-待补充
+## 线程锁的一些概念
+
+1 重入锁的概念
+
+   当线程获取到对象的锁后，同一个线程再次请求该对象锁，直接获得，不会被阻塞； 这就是锁的重入，Sychronized和ReentrantLock都是可重入锁。重入锁实例如下：
+
+```
+public class SynchronizedTest {
+    public void method1() {
+        synchronized (SynchronizedTest.class) {
+            System.out.println("方法1获得ReentrantTest的锁运行了");
+            method2();
+        }
+    }
+    public void method2() {
+        synchronized (SynchronizedTest.class) {
+            System.out.println("方法1里面调用的方法2重入锁,也正常运行了");
+        }
+    }
+    public static void main(String[] args) {
+        new SynchronizedTest().method1();
+    }
+}
+```
+
+上述代码中，调用method1()方法时，已经获得了锁，此时内部调用method2()方法时，由于本身已经具有该锁，所以可以再次获取。ReenTrantLock也是类似
+
+  2 公平锁
+
+
+  CPU在调度线程的时候是从等待队列中随机挑选一个线程执行，这种随机性无法保障线程的先到先得的，Sychronized就是非公平锁。这就会产生**饥饿**现象，即部分线程可能永远无法得到它的资源，永远无法获得cpu的执行权，而有些线程会不断强化它的资源。解决饥饿
+  现象就需要公平锁了， 公平锁会保障线程的先后顺序，避免饥饿现象。但公平锁效率比较低，因为它需要维护一个有序队列
+
+ReentrantLock便是一种公平锁，通过在构造方法中传入true就是公平锁，传入false，就是非公平锁。
+
+3. 死锁
+
+ 一般来说，要出现死锁问题需要满足以下条件：
+* 互斥条件：一个资源每次只能被一个线程使用。
+* 请求与保持条件：一个线程因请求资源而阻塞时，对已获得的资源保持不放。
+* 不剥夺条件：线程已获得的资源，在未使用完之前，不能强行剥夺。
+* 循环等待条件：若干线程之间形成一种头尾相接的循环等待资源关系。
+在JAVA编程中，有3种典型的死锁类型：
+静态的锁顺序死锁，动态的锁顺序死锁，协作对象之间发生的死锁。
 
 ## synchronized和ReentrantLock
 ### Synchroized关键字
@@ -134,6 +176,59 @@ JVM基于进入和退出Monitor对象来实现 代码块同步 和 方法同步 
 ![avatar](/image/synchronized_struct.png)
 
 ### ReentrantLock可重入锁
+1. Lock接口的主要方法
 
+* void lock(): 执行此方法时，如果锁处于空闲状态，当前线程将获取到锁。相反，如果锁已经被其他线程持有，将禁用当前线程，直到当前线程获取到锁。
+* boolean tryLock()： 如果锁可用，则获取锁，并立即返回true，否则返回false. 该方法和lock()的区别在于，tryLock()只是"试图"获取锁，如果锁不可用，不会导致当前线程被禁用，当前线程仍然继续往下执行代码。而lock()方法则是一定要获取到锁，如果锁不可用，就一直等待，在未获得锁之前,当前线程并不继续向下执行. 通常采用如下的代码形式调用tryLock()方法：
+* void unlock()： 执行此方法时，当前线程将释放持有的锁. 锁只能由持有者释放，如果线程并不持有锁，却执行该方法，可能导致异常的发生.
+* Condition newCondition()： 条件对象，获取等待通知组件。该组件和当前的锁绑定，当前线程只有获取了锁，才能调用该组件的await()方法，而调用后，当前线程将缩放锁。
+
+2. 使用方法。
+* lock()方法获取锁，然后使用unlock()方法释放锁。
+* lock()方法及之后的代码块要用try包裹，且必须要在finally中调用unlock()。 不然如果代码块发生异常，锁将永远不会释放，而发生死锁。
+
+3. Condition实现等待/通知
+关键字synchronized与wait()和notify()/notifyAll()方法相结合可以实现等待/通知模式，类似ReentrantLock也可以实现同样的功能，但需要借助于Condition对象。
+
+关于Condition实现等待/通知就不详细介绍了，可以完全类比wait()/notify()，基本使用和注意事项完全一致。
+就只简单介绍下类比情况：
+
+condition.await()————>lock.wait()
+
+condition.await(long time, TimeUnit unit)————>lock.wait(long timeout)
+
+condition.signal()————>lock.notify()
+
+condition.signaAll()————>lock.notifyAll()
+
+特殊之处：synchronized相当于整个ReentrantLock对象只有一个单一的Condition对象情况。而一个ReentrantLock却可以拥有多个Condition对象，来实现通知部分线程。
+
+具体实现方式：
+假设有两个Condition对象：ConditionA和ConditionB。那么由ConditionA.await()方法进入等待状态的线程，由ConditionA.signalAll()通知唤醒；由ConditionB.await()方法进入等待状态的线程，由ConditionB.signalAll()通知唤醒。篇幅有限，代码示例就不写了。
+
+
+
+
+## 生产者/消费者（Object.wait）
+###  waith()和notify()
+1. 方法简述
+* wait()方法： 让当前线程进入等待，并释放锁。
+
+* wait(long)方法： 让当前线程进入等待，并释放锁，不过等待时间为long，超过这个时间没有对当前线程进行唤醒，将自动唤醒。
+
+* notify()方法： 让当前线程通知那些处于等待状态的线程，当前线程执行完毕后释放锁，并从其他线程中唤醒**随机**其中一个继续执行。
+
+* notifyAll()方法： 让当前线程通知那些处于等待状态的线程，当前线程执行完毕后释放锁，将唤醒所有等待状态的线程。
+
+2. 注意事项，wait()和notify()方法使用注意事项
+* 当前的线程必须拥有当前对象的monitor，也即lock，就是锁，才能调用wait()方法，否则将抛出异常java.lang.IllegalMonitorStateException。
+
+* 线程调用wait()方法，释放它对锁的拥有权，然后等待另外的线程来通知它（通知的方式是notify()或者notifyAll()方法），这样它才能重新获得锁的拥有权和恢复执行。
+
+* 要确保调用wait()方法的时候拥有锁，即，wait()方法的调用必须放在synchronized方法或synchronized块中。
+
+* wait()方法会释放锁资源，Thread.sleep()不会释放锁资源
+
+* 被notify()唤醒的线程是不能被执行的，需要等到当前线程放弃这个对象的锁，当前线程会在方法执行完毕后释放锁。
 
 

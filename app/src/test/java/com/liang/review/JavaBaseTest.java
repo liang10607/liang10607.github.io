@@ -12,8 +12,9 @@ import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
-public class JavaBaseTest {
+public class JavaBaseTest implements Runnable {
 
     @Test
     public void testHashMap(){
@@ -40,22 +41,28 @@ public class JavaBaseTest {
         }
     }
 
-    @Test
-    public  void mainTest() {
-        CallableThreadTest ctt = new CallableThreadTest();
-        FutureTask<Integer> ft = new FutureTask<>(ctt);
-        for (int i = 0; i < 6; i++) {
-            System.out.println(Thread.currentThread().getName() + " 的循环变量i的值" + i);
-            if (i == 3) {
-                new Thread(ft, "有返回值的线程").start();
+    //创建公平锁
+    private static ReentrantLock lock=new ReentrantLock(false);
+    public void run() {
+        while(true){
+            lock.lock();
+            try{
+                System.out.println(Thread.currentThread().getName()+"获得锁");
+            }finally{
+                lock.unlock();
             }
         }
-        try {
-            System.out.println("子线程的返回值：" + ft.get());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+    }
+    public static void main(String[] args) {
+
+    }
+
+    @Test
+    public  void mainTest() {
+        JavaBaseTest lft=new JavaBaseTest();
+        Thread th1=new Thread(lft,"线程1");
+        Thread th2=new Thread(lft,"线程2");
+        th1.start();
+        th2.start();
     }
 }
