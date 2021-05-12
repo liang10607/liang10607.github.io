@@ -210,7 +210,7 @@ condition.signaAll()————>lock.notifyAll()
 
 
 ## 生产者/消费者（Object.wait）
-###  waith()和notify()
+###  wait()和notify()
 1. 方法简述
 * wait()方法： 让当前线程进入等待，并释放锁。
 
@@ -231,4 +231,303 @@ condition.signaAll()————>lock.notifyAll()
 
 * 被notify()唤醒的线程是不能被执行的，需要等到当前线程放弃这个对象的锁，当前线程会在方法执行完毕后释放锁。
 
+### 使用wait()和condition实现生产者消费者模式
+1. wait()/notify()实现
 
+```
+//生产者
+public class Product {
+    private String lock;
+
+    public Product(String lock) {
+        super();
+        this.lock = lock;
+    }
+    public void setValue(){
+        try {
+            synchronized (lock) {
+                if(!StringObject.value.equals("")){
+                    //有值，不生产
+                    lock.wait();
+                }
+                String  value = System.currentTimeMillis()+""+System.nanoTime();
+                System.out.println("set的值是："+value);
+                StringObject.value = value;
+                lock.notifyAll();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+//消费者
+public class Consumer {
+    private String lock;
+
+    public Consumer(String lock) {
+        super();
+        this.lock = lock;
+    }
+    public void getValue(){
+        try {
+            synchronized (lock) {
+                if(StringObject.value.equals("")){
+                    //没值，不进行消费
+                    lock.wait();
+                }
+                System.out.println("get的值是："+StringObject.value);
+                StringObject.value = "";
+                lock.notifyAll();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+}
+//生产者线程
+public class ThreadProduct extends Thread{
+    private Product product;
+
+    public ThreadProduct(Product product) {
+        super();
+        this.product = product;
+    }
+    @Override
+    public void run() {
+        //死循环，不断的生产
+        while(true){
+            product.setValue();
+        }
+    }
+
+}
+消费者线程
+public class ThreadConsumer extends Thread{
+    private Consumer consumer;
+
+    public ThreadConsumer(Consumer consumer) {
+        super();
+        this.consumer = consumer;
+    }
+    @Override
+    public void run() {
+        //死循环，不断的消费
+        while(true){
+            consumer.getValue();
+        }
+    }
+
+}
+//开启生产者/消费者模式
+public class Test {
+
+    public static void main(String[] args) throws InterruptedException {
+        String lock = new String("");
+        Product product = new Product(lock);
+        Consumer consumer = new Consumer(lock);
+        ThreadProduct pThread = new ThreadProduct(product);
+        ThreadConsumer cThread = new ThreadConsumer(consumer);
+        pThread.start();
+        cThread.start();
+    }
+}
+```
+
+2. 使用Lock.Condition实现
+
+```
+///生产者
+public class Product {
+    private ReentrantLock lock;
+    private Condition condition;
+
+    public Product(ReentrantLock lock, Condition condition) {
+        super();
+        this.lock = lock;
+        this.condition = condition;
+    }
+
+    public void setValue() {
+        try {
+            lock.lock();
+            while (!StringObject.value.equals("")) {
+                // 有值，不生产
+                condition.await();
+            }
+            String value = System.currentTimeMillis() + "" + System.nanoTime();
+            System.out.println("set的值是：" + value);
+            StringObject.value = value;
+            condition.signalAll();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+
+
+    }
+}
+
+//消费者
+public class Consumer {
+    private ReentrantLock lock;
+    private Condition condition;
+
+    public Consumer(ReentrantLock lock,Condition condition) {
+        super();
+        this.lock = lock;
+        this.condition = condition;
+    }
+    public void getValue(){
+        try {
+                lock.lock();
+                while(StringObject.value.equals("")){
+                    //没值，不进行消费
+                    condition.await();
+                }
+                System.out.println("get的值是："+StringObject.value);
+                StringObject.value = "";
+                condition.signalAll();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+    }
+}
+//多生产者和多消费者模式
+public static void main(String[] args) throws InterruptedException {
+        ReentrantLock lock = new ReentrantLock();
+        Condition newCondition = lock.newCondition();
+        Product product = new Product(lock,newCondition);
+        Consumer consumer = new Consumer(lock,newCondition);
+        for(int i=0;i<3;i++){
+            ThreadProduct pThread = new ThreadProduct(product);
+            ThreadConsumer cThread = new ThreadConsumer(consumer);
+            pThread.start();
+            cThread.start();
+        }
+
+    }
+```
+
+## volatile关键字
+### Java内存模式
+> Java内存模型规定了所有的变量都存储在主内存中。每条线程中还有自己的工作内存，线程的工作内存中保存了被该线程所使用到的变量（这些变量是从主内存中拷贝而来）。线程对变量的所有操作（读取，赋值）都必须在工作内存中进行。不同线程之间也无法直接访问对方工作内存中的变量，线程间变量值的传递均需要通过主内存来完成。
+
+基于此种内存模型，便产生了多线程编程中的数据“脏读”等问题。
+
+![avatar](/image/java_mem_model.png)
+
+### Java并发编程得三大特性
+1. 原子性
+原子性：即一个操作或者多个操作，要么全部执行，并且执行的过程不会被任何因素打断，要么就都不执行。
+
+在Java中，对基本数据类型的变量的读取和赋值操作是原子性操作，即这些操作是不可被中断的，要么执行，要么不执行。
+
+上面一句话虽然看起来简单，但是理解起来并不是那么容易。看下面一个例子i：
+请分析以下哪些操作是原子性操作：
+
+```
+x = 10;        //语句1  原子性操作
+y = x;         //语句2  先读取x的值，再赋值 非原子性
+x++;           //语句3  非原子性
+x = x + 1;     //语句4  非原子性
+```
+
+2. 可见性
+可见性是指当多个线程访问同一个变量时，一个线程修改了这个变量的值，其他线程能够立即看得到修改的值。
+
+对于可见性，Java提供了volatile关键字来保证可见性。
+
+当一个共享变量被volatile修饰时，它会保证修改的值会立即被更新到主存，当有其他线程需要读取时，它会去内存中读取新值。
+
+而普通的共享变量不能保证可见性，因为普通共享变量被修改之后，什么时候被写入主存是不确定的，当其他线程去读取时，此时内存中可能还是原来的旧值，因此无法保证可见性。
+
+另外，通过synchronized和Lock也能够保证可见性，synchronized和Lock能保证同一时刻只有一个线程获取锁然后执行同步代码，并且在释放锁之前会将对变量的修改刷新到主存当中。因此可以保证可见性。
+
+3. 有序性
+有序性：即程序执行的顺序按照代码的先后顺序执行。
+
+* 指令重排序，一般来说，处理器为了提高程序运行效率，可能会对输入代码进行优化，它不保证程序中各个语句的执行先后顺序同代码中的顺序一致，但是它会保证程序最终执行结果和代码顺序执行的结果是一致的。
+* 因为处理器在进行重排序时是会考虑指令之间的数据依赖性，如果一个指令Instruction 2必须用到Instruction 1的结果，那么处理器会保证Instruction 1会在Instruction 2之前执行。
+* 指令重排序不会影响单个线程的执行，但是会影响到线程并发执行的正确性。
+* 也就是说，要想并发程序正确地执行，必须要保证原子性、可见性以及有序性。只要有一个没有被保证，就有可能会导致程序运行不正确。
+
+### volatile保证可见性
+
+```
+//线程1
+boolean stop = false;
+while(!stop){
+    doSomething();
+}
+ 
+//线程2
+stop = true;
+```
+那么当线程2更改了stop变量的值之后，但是还没来得及写入主存当中，线程2转去做其他事情了，那么线程1由于不知道线程2对stop变量的更改，因此还会一直循环下去。
+
+但是用volatile修饰之后就变得不一样了：
+
+第一：使用volatile关键字会强制将修改的值立即写入主存；
+
+第二：使用volatile关键字的话，当线程2进行修改时，会导致线程1的工作内存中缓存变量stop的缓存行无效（反映到硬件层的话，就是CPU的L1或者L2缓存中对应的缓存行无效）；
+
+第三：由于线程1的工作内存中缓存变量stop的缓存行无效，所以线程1再次读取变量stop的值时会去主存读取。
+
+### volatile不能确保原子性
+根源就在这里，自增操作不是原子性操作，而且volatile也无法保证对变量的任何操作都是原子性的。
+
+解决方案：可以通过synchronized或lock，进行加锁，来保证操作的原子性。也可以通过AtomicInteger。
+
+在java 1.5的java.util.concurrent.atomic包下提供了一些原子操作类，即对基本数据类型的 自增（加1操作），自减（减1操作）、以及加法操作（加一个数），减法操作（减一个数）进行了封装，保证这些操作是原子性操作。atomic是利用CAS来实现原子性操作的（Compare And Swap），CAS实际上是利用处理器提供的CMPXCHG指令实现的，而处理器执行CMPXCHG指令是一个原子性操作。
+
+### volatile保证有序性
+volitile修饰的属性，会禁止指令重排，但只是禁止修饰的属性被重拍。修饰的熟悉赋值语句前的语句不会被重排到volatile后面，lolatile后的语句也不能早于其先执行。但volatile前后的语句重排，不受限制。
+
+### volatile实现原理
+* 可见性原理
+但这时候其他处理器的缓存还是旧的，所以在多处理器环境下，为了保证各个处理器缓存一致，每个处理会通过嗅探在总线上传播的数据来检查 自己的缓存是否过期， **当处理器发现自己缓存行对应的内存地址被修改了**，就会将当前处理器的缓存行设置成无效状态，当处理器要对这个数据进行修改操作时，会强制重新从系统内存把数据读到处理器缓存里。 这一步确保了其他线程获得的声明了volatile变量都是从主内存中获取最新的。
+* 有序性原理
+2.有序性
+Lock前缀指令实际上相当于一个内存屏障（也成内存栅栏），它确保**指令重排序时不会把其后面的指令排到内存屏障之前的位置，也不会把前面的指令排到内存屏障的后面；即在执行到内存屏障这句指令时，在它前面的操作已经全部完成。
+
+### volatile的应用场景
+synchronized关键字是防止多个线程同时执行一段代码，那么就会很影响程序执行效率，而volatile关键字在某些情况下性能要优于synchronized，但是要注意volatile关键字是无法替代synchronized关键字的，因为volatile关键字无法保证操作的原子性
+
+1. 状态标记量
+
+```
+volatile boolean flag = false;
+ //线程1
+while(!flag){
+    doSomething();
+}
+  //线程2
+public void setFlag() {
+    flag = true;
+}
+```
+
+2. 单例模式中的double check
+```
+class Singleton {
+    private volatile static Singleton instance = null;
+
+    private Singleton() {
+
+    }
+
+    public static Singleton getInstance() {
+        if (instance == null) {
+            synchronized (Singleton.class) {
+                if (instance == null)
+                    instance = new Singleton();
+            }
+        }
+        return instance;
+    }
+}
+```
