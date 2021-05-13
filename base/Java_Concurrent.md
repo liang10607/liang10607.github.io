@@ -45,7 +45,7 @@ new Thread(ft, "有返回值的线程").start();
 * 现场池中，线程队列有四种，分别是
 
 | 阻塞队列 |	说明 |
-| --- | --— |
+| --- | -- |
 | ArrayBlockingQueue | 基于数组实现的有界的阻塞队列,该队列按照FIFO（先进先出）原则对队列中的元素进行排序。|
 |LinkedBlockingQueue	 | 基于链表实现的阻塞队列，该队列按照FIFO（先进先出）原则对队列中的元素进行排序。|
 |SynchronousQueue	 | 内部没有任何容量的阻塞队列。在它内部没有任何的缓存空间。对于SynchronousQueue中的数据元素只有当我们试着取走的时候才可能存在。|
@@ -537,9 +537,98 @@ class Singleton {
 * 它假设最坏的情况，认为一个线程修改共享数据的时候其他线程也会修改该数据，因此只在确保其它线程不会造成干扰的情况下执行，会导致其它所有需要锁的线程挂起，等待持有锁的线程释放锁。
 * 独占锁是一种悲观锁，synchronized和Reentrantlock都是一种独占锁，也就是悲观锁
 * 传统的关系型数据库里边就用到了很多这种锁机制，比如行锁，表锁等，读锁，写锁等，都是在做操作之前先上锁。
-
+* 悲观锁抢占锁的过程非常耗费资源，由于在进程挂起和恢复执行过程中存在着很大的开销
 
 2. 乐观锁
+* 乐观锁的概念，他的核心思路就是，每次不加锁而是假设修改数据之前其他线程一定不会修改，如果因为修改过产生冲突就失败就重试，直到成功为止
+* 某个线程可以不让出cpu，而是一直while循环，如果失败就重试，直到成功为止。所以，当数据争用不严重时，乐观锁效果更好。比如CAS就是一种乐观锁思想的应用
 
+### CAS锁介绍
+* CAS 操作包含三个操作数 —— 内存位置（V）、预期原值（A）和新值(B)。执行CAS操作的时候，将内存位置的值与预期原值比较，如果相匹配，那么处理器会自动将该位置值更新为新值。否则，处理器不做任何操作
+* CAS先取得内存位置的预期原来的值，然后准备号新值，并通过USafe中的compareAndSwapInt来进行值得更新操作
+* compareAndSwapInt再进行值得更新前会比对之前取到得预期原值，于当前内存地址得值进行比对，若是一直则update新值，若是发现不一致，则重循环重试，直到满足条件再更新。
+* compareAndSwapInt是java native方法来实现的，而compareAndSwapInt方法内部又是借助C来调用CPU的底层指令来保证在**硬件层面**上实现原子操作的
 
+  下面我们来以AtomicIneger的源码为例来看看CAS操作：
+```
+public final int getAndAdd(int delta) {
+	for (; ; ) {
+		int current = get();
+		int next = current + delta;
+		if (compareAndSet(current, next))
+			return current;
+	}
+}
+```
 
+### CAS锁需要注意得地方
+* compareAndSwapInt是通过比对内存地址得值是否发生了变化，那有可能出现ABA问题，即两次比对值没发生变化，但实际期间有变化但最后得值没变。版本号是解决ABA得一个方式，AtomicStampedReference
+* 循环时间长开销大。自旋CAS如果长时间不成功，会给CPU带来非常大的执行开销
+
+## AQS（AbstractQueuedSynchronizer）详解
+AQS简核心是通过一个共享变量来同步状态，变量的状态由子类去维护，而AQS框架做的是：
+
+线程阻塞队列的维护
+线程阻塞和唤醒
+共享变量的修改都是通过Unsafe类提供的CAS操作完成的。 AbstractQueuedSynchronizer类的主要方法是acquire和release，典型的模板方法， 下面这4个方法由子类去实现：
+
+protected boolean tryAcquire(int arg)
+protected boolean tryRelease(int arg)
+protected int tryAcquireShared(int arg)
+protected boolean tryReleaseShared(int arg)
+acquire方法用来获取锁，返回true说明线程获取成功继续执行，一旦返回false则线程加入到等待队列中，等待被唤醒，release方法用来释放锁。 一般来说实现的时候这两个方法被封装为lock和unlock方法。
+
+[AbstractQueuedSynchronizer详解](https://zhuanlan.zhihu.com/p/178991617)
+
+* 双链表的形式来表示FIFO（先进先出）
+
+## ReentrantLock详解
+* RentrantLock实现了lock接口，基于AbstractQueuedSynchronizer实现。默认为非公平锁
+### 重入锁实现
+重入锁，即线程可以重复获取已经持有的锁。在非公平和公平锁中，都对重入锁进行了实现。
+```
+    if (current == getExclusiveOwnerThread()) {
+        int nextc = c + acquires;
+        if (nextc < 0)
+            throw new Error("Maximum lock count exceeded");
+        setState(nextc);
+        return true;
+    }
+```
+### 总结
+ReentrantLock提供了内置锁类似的功能和内存语义。
+此外，ReetrantLock还提供了其它功能，包括定时的锁等待、可中断的锁等待、公平性、以及实现非块结构的加锁、Condition，对线程的等待和唤醒等操作更加灵活，一个ReentrantLock可以有多个Condition实例，所以更有扩展性，不过ReetrantLock需要显示的获取锁，并在finally中释放锁，否则后果很严重。
+ReentrantLock在性能上似乎优于Synchronized，其中在jdk1.6中略有胜出，在1.5中是远远胜出。那么为什么不放弃内置锁，并在新代码中都使用ReetrantLock？
+在java1.5中， 内置锁与ReentrantLock相比有例外一个优点：在线程转储中能给出在哪些调用帧中获得了哪些锁，并能够检测和识别发生死锁的线程。Reentrant的非块状特性任然意味着，获取锁的操作不能与特定的栈帧关联起来，而内置锁却可以。
+因为内置锁时JVM的内置属性，所以未来更可能提升synchronized而不是ReentrantLock的性能。例如对线程封闭的锁对象消除优化，通过增加锁粒度来消除内置锁的同步。
+
+## 并发集合
+1. Queue接口回顾
+在Queue接口中，除了继承Collection接口中定义的方法外，它还分别额外地定义**插入**、**删除**、**查询**这3个操作，其中每一个操作都以两种不同的形式存在，每一种形式都对应着一个方法。
+|   |Throws exception|	Returns special value| Blocks|	Times out
+| --- | --- |--- | --- | ---|
+| Insert | add(e) |	offer(e)| put(e)	| offer(e, time, unit)|
+|Remove	|remove()	|poll() | take()	| poll(time, unit)
+|Examine|	element()|	peek()
+ BlockingQueue接口回顾
+2. BlockingQueue是JDK1.5出现的接口，它在原来的Queue接口基础上提供了更多的额外功能：当获取队列中的头部元素时，如果队列为空，那么它将会使执行线程处于**等待**状态；当添加一个元素到队列的尾部时，如果队列已经满了，那么它同样会使执行的线程处于等待状态。
+### ArrayBlockingQueue
+* 底层以数组的形式保存数据(实际上可看作一个循环数组)
+* 通过全局的ReentrantLock 实现阻塞进队列和出队列。使用Condition来等待
+### LinkedBlockingQueue
+* 它是由一个基于单向链表的阻塞队列
+>      当前阻塞队列中的元素数量
+        PS:如果你看过ArrayBlockingQueue的源码,你会发现
+        ArrayBlockingQueue底层保存元素数量使用的是一个
+        普通的int类型变量。其原因是在ArrayBlockingQueue底层
+        对于元素的入队列和出队列使用的是同一个lock对象。而数
+        量的修改都是在处于线程获取锁的情况下进行操作，因此不
+        会有线程安全问题。
+        而LinkedBlockingQueue却不是，它的入队列和出队列使用的是两个    
+        不同的lock对象,因此无论是在入队列还是出队列，都会涉及对元素数
+        量的并发修改，(之后通过源码可以更加清楚地看到)因此这里使用了一个原子操作类
+        来解决对同一个变量进行并发修改的线程安全问题。
+* inkedBlockingQueue作为阻塞队列的原因就在于其无界性。因为线程大小固定的线程池，其线程的数量是不具备伸缩性的，当任务非常繁忙的时候，就势必会导致所有的线程都处于工作状态，如果使用一个有界的阻塞队列来进行处理，那么就非常有可能很快导致队列满的情况发生，从而导致任务无法提交而抛出RejectedExecutionException，而使用无界队列由于其良好的存储容量的伸缩性，可以很好的去缓冲任务繁忙情况下场景，即使任务非常多，也可以进行动态扩容，当任务被处理完成之后，队列中的节点也会被随之被GC回收，非常灵活。
+
+### ConcurrentHashMap
+* 利用CAS+Synchronized来保证并发更新的安全，底层依然采用数组+链表+红黑树的存储结构

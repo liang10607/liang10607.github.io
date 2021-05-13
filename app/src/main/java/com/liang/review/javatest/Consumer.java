@@ -1,7 +1,10 @@
 package com.liang.review.javatest;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Consumer {
     private String lock;
+    ReentrantLock s = new ReentrantLock()
 
     public Consumer(String lock) {
         super();
