@@ -18,6 +18,8 @@
 
 [Java面试题搜罗](https://www.cnblogs.com/crazymakercircle/p/14323919.html)
 
+[Java数据结构和算法](https://www.infoq.cn/article/u94vcejf5-cszessptnu)
+
 
 ### 日记
 [随手记](/Diary/5-13.md)
