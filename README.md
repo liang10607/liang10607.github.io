@@ -20,6 +20,10 @@
 
 [Java数据结构和算法](https://www.infoq.cn/article/u94vcejf5-cszessptnu)
 
+[进阶面试题](https://juejin.cn/post/6844904100597858312#heading-2)
+
+[基础面试题](https://github.com/LRH1993/android_interview)
+
 
 ### 日记
 [随手记](/Diary/5-13.md)
