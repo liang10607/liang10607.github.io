@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import com.liang.review.R;
 import com.liang.review.beans.CloneTest;
 
+import java.util.ArrayList;
+
 public class MainFragment extends Fragment {
 
     private MainViewModel mViewModel;
@@ -36,7 +38,8 @@ public class MainFragment extends Fragment {
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-
+        ArrayList a =new ArrayList()
+                a.clear();
         // 创建一个子线程，并在子线程中创建一个Handler，且重写handleMessage
         new Thread(new Runnable() {
             @Override
