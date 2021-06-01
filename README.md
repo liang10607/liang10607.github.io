@@ -13,16 +13,16 @@
 
 [Java并发和多线程](/base/Java_Concurrent.md)
 
-### 面试题搜罗
-[Java的30道精选笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
+### 文档搜罗
+[Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
 
-[Java面试题搜罗](https://www.cnblogs.com/crazymakercircle/p/14323919.html)
+[Java](https://www.cnblogs.com/crazymakercircle/p/14323919.html)
 
 [Java数据结构和算法](https://www.infoq.cn/article/u94vcejf5-cszessptnu)
 
-[进阶面试题](https://juejin.cn/post/6844904100597858312#heading-2)
+[进阶题](https://juejin.cn/post/6844904100597858312#heading-2)
 
-[基础面试题](https://github.com/LRH1993/android_interview)
+[基础题](https://github.com/LRH1993/android_interview)
 
 
 ### 日记
