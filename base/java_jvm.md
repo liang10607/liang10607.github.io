@@ -43,16 +43,19 @@
 4. 分析数据是否为垃圾的方法：引用计数算法，可达性算法
 5. 清除垃圾的算法包括：标记清除法，复制法，标记整理法，分代收集算法
 
-### 分带收集算法
+### 分代收集算法
 大部分的对象都很短命，都在很短的时间内都被回收了（IBM 专业研究表明，一般来说，98% 的对象都是朝生夕死的，经过一次 Minor GC 后就会被回收），所以分代收集算法根据对象存活周期的不同将堆分成新生代和老生代
 1. 新生代：新生代又分为 Eden 区， from Survivor 区（简称S0），to Survivor 区(简称 S1),三者的比例为 8: 1 : 1。
    * 第一次GC时先标记Eden区的存活对象，然后使用复制算法把存活对象复制到S0区并清空Eden。第二次GC时会把Eden和S0存活的对象复制到S1,并清空eden和S0.
    * 每次GC时，新生代中的存活对象都会对其年龄加1
    * 当新生代对象的年龄达到阈值，则会呗移动到老年代中
    * 大对象会直接分配到老年代中
-   * 在 S0（或S1） 区相同年龄的对象大小之和大于 S0（或S1）空间一半以上时，则年龄大于等于该年龄的对象也会晋升到老年代。
+   * 在 S0（或S1）区相同年龄的对象大小之和大于 S0（或S1）空间一半以上时，则年龄大于等于该年龄的对象也会晋升到老年代。
 2. 老年代的空间担保：虚拟机会先检查老年代最大可用的连续空间是否大于新生代所有对象的总空间，如果大于，那么Minor GC 可以确保是安全的,如果不大于，那么虚拟机会查看 HandlePromotionFailure 设置值是否允许担保失败。如果允许，那么会继续检查老年代最大可用连续空间是否大于历次晋升到老年代对象的平均大小，如果大于则进行 Minor GC，否则可能进行一次 Full GC。
 3. Stop The World：如果老年代满了，会触发 Full GC, Full GC 会同时回收新生代和老年代（即对整个堆进行GC），它会导致 Stop The World（简称 STW）,造成挺大的性能开销。什么是 STW ？所谓的 STW, 即在 GC（minor GC 或 Full GC）期间，只有垃圾回收器线程在工作，其他工作线程则被挂起。
+
+### **垃圾收集器**
+待复盘
 
 ### Java堆和栈的区别
 1. 栈存储的时线程的局部变量和方法调用，堆是存储全局的Java对象
@@ -141,8 +144,129 @@ Java类的生命周期顺序为：加载，验证，准备，解析，初始化�
 2. 其他类加载器：由Java语言实现，继承自抽象类ClassLoader. 如
    * 扩展类加载器（Extension ClassLoader）:负责加载<JAVA_HOME>\lib\ext目录或者java.ext.dirs系统变量指定的路劲中的所有类库，即负责加载Java扩展的核心类之外的类
    * 应用程序类加载器（Application ClassLoader）:负责加载**用户**类路径（classpath）上指定类库，可以在java代码中使用ClassLoader.getSystemClassLoader()方法直接获取
+**注意**：我们可以直接使用这个类加载器。一般情况，如果我们没有自定义类加载器默认就是用这个加载器。
+![avatar](/image/double_link_class_load.png)
+
 
 #### 双亲委派模型
-双亲委派模型的工作流程是：如果一个类加载器收到类的加载请求，它首先不会自己去尝试加载这个类，二十把请求委托给父加载器去完成，依次向上。因此所有的类加载器最终都应该被传递到顶层的启动类加载器中，
-
 [双亲委派机制实例](https://www.jianshu.com/p/acc7595f1b9d)
+* 双亲委派模型的工作流程是：
+   如果一个类加载器收到类的加载请求，它首先不会自己去尝试加载这个类，二十把请求委托给**父加载器**去完成，依次向上。因此所有的类加载器最终都应该被传递到顶层的启动类加载器中，
+
+* 双亲委派好处：
+> 黑客自定义一个java.lang.String类，该String类具有系统的String类一样的功能，只是在某个函数稍作修改。比如equals函数，这个函数经常使用，如果在这这个函数中，黑客加入一些“病毒代码”。并且通过自定义类加载器加入到JVM中。此时，如果没有双亲委派模型，那么JVM就可能误以为黑客自定义的java.lang.String类是系统的String类，导致“病毒代码”被执行。
+
+> 或许你会想，我在自定义的类加载器里面强制加载自定义的java.lang.String类，不去通过调用父加载器不就好了吗?确实，这样是可行。但是，在JVM中，判断一个对象是否是某个类型时，如果该对象的实际类型与待比较的类型的类加载器不同，那么会返回false。判断一个实例是否属于某个类时，不仅判断类名等元数据而且会判断是否为同一个类加载器
+
+### 自定义类加载器
+#### LoadClass方法
+```
+protected Class<?> loadClass(String name, boolean resolve)
+    throws ClassNotFoundException
+{
+    synchronized (getClassLoadingLock(name)) {
+        // First, check if the class has already been loaded
+        Class c = findLoadedClass(name);
+        if (c == null) {
+            long t0 = System.nanoTime();
+            try {
+                if (parent != null) {
+                    c = parent.loadClass(name, false);
+                } else {
+                    c = findBootstrapClassOrNull(name);
+                }
+            } catch (ClassNotFoundException e) {
+                // ClassNotFoundException thrown if class not found
+                // from the non-null parent class loader
+            }
+
+            if (c == null) {
+                // If still not found, then invoke findClass in order
+                // to find the class.
+                long t1 = System.nanoTime();
+                c = findClass(name);
+
+                // this is the defining class loader; record the stats
+                sun.misc.PerfCounter.getParentDelegationTime().addTime(t1 - t0);
+                sun.misc.PerfCounter.getFindClassTime().addElapsedTimeFrom(t1);
+                sun.misc.PerfCounter.getFindClasses().increment();
+            }
+        }
+        if (resolve) {
+            resolveClass(c);
+        }
+        return c;
+    }
+}
+```
+> 1. 首先，检查一下指定名称的类是否已经加载过，如果加载过了，就不需要再加载，直接返回。
+  2. 如果此类没有加载过，那么，再判断一下是否有父加载器；如果有父加载器，则由父加载器加载（即调用parent.loadClass(name, false);）.或者是调用bootstrap类加载器来加载。
+  3. 如果父加载器及bootstrap类加载器都没有找到指定的类，那么调用当前类加载器的findClass方法来完成类加载。
+**所以，要实现自定义类加载器，则需重写findClass方法**  
+
+#### findClass()方法
+   父加载器和boot加载器都没成功加载到class, 走到自定义类加载器则会默认抛出ClassNotFoundException.具体代码如下：
+```
+protected Class<?> findClass(String name) throws ClassNotFoundException {
+        throw new ClassNotFoundException(name);
+}
+```   
+   如果是是读取一个指定的名称的类为byte数组的话，这很好办。但是如何将字节数组转为Class对象呢？很简单，Java提供了**defineClass**方法，通过这个方法，就可以把一个字节数组转为Class对象啦~. 即要实现自定义的findClass，需要依赖defineClass方法
+   
+### defineClass()方法
+> 将一个字节数组转为Class对象，这个字节数组是class文件读取后最终的字节数组。如，假设class文件是加密过的，则需要解密后作为形参传入defineClass函数。
+```
+protected final Class<?> defineClass(String name, byte[] b, int off, int len)
+        throws ClassFormatError  {
+        return defineClass(name, b, off, len, null);
+}
+```  
+### 自定义类加载器调用过程
+ ![avatar](/image/custom_class_load.png)
+```
+import java.io.FileInputStream;
+import java.lang.reflect.Method;
+
+public class Main {
+    static class MyClassLoader extends ClassLoader {
+        private String classPath;
+
+        public MyClassLoader(String classPath) {
+            this.classPath = classPath;
+        }
+
+        private byte[] loadByte(String name) throws Exception {
+            name = name.replaceAll("\\.", "/");
+            FileInputStream fis = new FileInputStream(classPath + "/" + name
+                    + ".class");
+            int len = fis.available();
+            byte[] data = new byte[len];
+            fis.read(data);
+            fis.close();
+            return data;
+
+        }
+
+        protected Class<?> findClass(String name) throws ClassNotFoundException {
+            try {
+                byte[] data = loadByte(name);
+                return defineClass(name, data, 0, data.length);
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new ClassNotFoundException();
+            }
+        }
+
+    };
+
+    public static void main(String args[]) throws Exception {
+        MyClassLoader classLoader = new MyClassLoader("D:/test");
+        Class clazz = classLoader.loadClass("com.huachao.cl.Test");
+        Object obj = clazz.newInstance();
+        Method helloMethod = clazz.getDeclaredMethod("hello", null);
+        helloMethod.invoke(obj, null);
+    }
+}
+```
+
+

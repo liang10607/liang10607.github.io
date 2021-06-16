@@ -13,6 +13,9 @@
 
 [Java并发和多线程](/base/Java_Concurrent.md)
 
+[Java虚拟机](/base/java_jvm.md)
+
+
 ### 文档搜罗
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
 
