@@ -15,6 +15,10 @@
 
 [Java虚拟机](/base/java_jvm.md)
 
+### 设计模式
+[创建型](/design_model/Creational_Pattern.md)
+[结构型](/design_model/stucts_model.md)
+[行为型](/design_model/behavior_model.md)
 
 ### 文档搜罗
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
