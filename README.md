@@ -1,19 +1,24 @@
-## Welcome to Bill's githu pages
+## Welcome to Bill's github pages
 
- 刚开始建立这个博客，敬请继续关注
+### Java基础
 
-### 基础
-[Java基础](/base/java_stuct.md)
+[Java基础](/java_base/java_stuct.md)
 
-[Java高级特性：泛型，反射，注解](/base/Java_high_feature.md)
+[Java高级特性：泛型，反射，注解](/java_base/Java_high_feature.md)
 
-[Java IO和文件](/base/JavaIO.md)
+[Java IO和文件](/java_base/JavaIO.md)
 
-[Java其他基础内](/base/Java_more.md)
+[Java其他基础内](/java_base/Java_more.md)
 
-[Java并发和多线程](/base/Java_Concurrent.md)
+[Java并发和多线程](/java_base/Java_Concurrent.md)
 
-[Java虚拟机](/base/java_jvm.md)
+[Java虚拟机](/java_base/java_jvm.md)
+
+### Android基础
+
+[Activity全解析](/Android_base/Activity.md)
+
+
 
 ### 设计模式
 
@@ -23,7 +28,9 @@
 
 [行为型](/design_model/behavior_model.md)
 
+### 算法练习
 
+[常见题](/algorithm/common_algorithm.md)
 
 ### 文档搜罗
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
@@ -35,11 +42,6 @@
 [进阶题](https://juejin.cn/post/6844904100597858312#heading-2)
 
 [基础题](https://github.com/LRH1993/android_interview)
-
-### 算法练习
-
-[常见题](/algorithm/common_algorithm.md)
-
 
 ### 日记
 [随手记](/Diary/5-13.md)
