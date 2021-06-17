@@ -100,3 +100,84 @@ public static void Main(string[] args)
     Console.ReadKey();
 }
 ```
+  抽象工厂模式，总结起来就是有一个抽象工厂父类，然后有由具体不同的工厂子类负责真正创建对象，其对应的产品类也是有抽象父类和具体子类，不同的具体工厂子类创建不同的产品子类。
+  
+# 单例模式
+   作为对象的创建模式，单例模式确保某一个类只有一个实例，而且自行实例化并向整个系统提供这个实例。这个类称为单例类。  
+## 懒汉式，Double Check模式
+
+```
+public static Singleton getSingleton() {
+    if (instance == null) {                         //Single Checked
+        synchronized (Singleton.class) {
+            if (instance == null) {                 //Double Checked
+                instance = new Singleton();
+            }
+        }
+    }
+    return instance ;
+}
+```
+这段代码看起来很完美，很可惜，它是有问题。主要在于instance = new Singleton()这句，这并非是一个原子操作，事实上在 JVM 中这句话大概做了下面 3 件事情:
+1.给 instance 分配内存
+
+2.调用 Singleton 的构造函数来初始化成员变量
+
+3.将instance对象指向分配的内存空间（执行完这步 instance 就为非 null 了）。
+
+上述步骤中的 2 和3可能会出现指令重排，如果执行顺序是132，然后另外一个线程获得了锁，在2执行前，使用instance的成员变量，则会有问题
+
+我们只需要将 instance 变量声明成 volatile 就可以了。
+**也就是说，在 volatile 变量的赋值操作后面会有一个内存屏障（生成的汇编代码上），读操作不会被重排序到内存屏障之前**
+
+## 饿汉式 Static final Filed
+因为单例的实例被声明成 static 和 final 变量了，在第一次加载类到内存中时就会初始化，所以创建实例本身是线程安全的。
+
+```
+public class Singleton{
+    //类加载时就初始化
+    private static final Singleton instance = new Singleton();
+
+    private Singleton(){}
+
+    public static Singleton getInstance(){
+        return instance;
+    }
+}
+```
+
+## 静态内部类 static nested class
+1. 静态单例对象没有作为Singleton的成员变量直接实例化，因此类加载时不会实例化Singleton
+2. 第一次调用getInstance()时才再加载内部类SingletonHolder，此时也才进行单例对象的创建，并且类加载过程中，系统会保障线程安全
+3. 它也是一种懒汉式的加载方式
+```
+public class Singleton {  
+    private static class SingletonHolder {  
+        private static final Singleton INSTANCE = new Singleton();  
+    }  
+    private Singleton (){}  
+    public static final Singleton getInstance() {  
+        return SingletonHolder.INSTANCE; 
+    }  
+}
+```
+
+## 枚举单例
+   用枚举写单例实在太简单了！这也是它最大的优点。下面这段代码就是声明枚举实例的通常做法。
+   即用枚举类来实现单例，可以避免反序列化和反射的攻击
+```
+public enum EasySingleton{
+    INSTANCE;
+}
+```
+
+# 建造者模式（Builder）
+**优点**
+   良好的封装性， 使用建造者模式可以使客户端不必知道产品内部组成的细节；
+   建造者独立，容易扩展；
+在对象创建过程中会使用到系统中的一些其它对象，这些对象在产品对象的创建过程中不易得到。
+**缺点**
+   会产生多余的Builder对象以及Director对象，消耗内存；
+   对象的构建过程暴露。
+
+

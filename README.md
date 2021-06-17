@@ -16,9 +16,14 @@
 [Java虚拟机](/base/java_jvm.md)
 
 ### 设计模式
+
 [创建型](/design_model/Creational_Pattern.md)
+
 [结构型](/design_model/stucts_model.md)
+
 [行为型](/design_model/behavior_model.md)
+
+
 
 ### 文档搜罗
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
@@ -30,6 +35,10 @@
 [进阶题](https://juejin.cn/post/6844904100597858312#heading-2)
 
 [基础题](https://github.com/LRH1993/android_interview)
+
+### 算法练习
+
+[常见题](/algorithm/common_algorithm.md)
 
 
 ### 日记
