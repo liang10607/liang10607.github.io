@@ -20,16 +20,16 @@
 
 # 适配器模式(Adapter)
 
-## 简介
+### 简介
   适配器模式把一个类的接口变换成客户端所期待的另一种接口，从而使原本因接口不匹配而无法在一起工作的两个类能够在一起工作。
    
   例如电源插座，从两个口转化为三个口得工具就是适配器。
 
   适配器模式有类的适配器模式和对象的适配器模式两种形式
 
-## 类的适配器模式
+### 类的适配器模式
 
-## 对象的适配器模式
+### 对象的适配器模式
 
    类的适配器模式主要是依靠继承关系来实现，如下述代码中的Adaptee和Target两个类则通过继承关系，实现了两个类一起工作
 
@@ -47,7 +47,7 @@ public class Adapter extends Adaptee implements Target {
 }
 ```
 
-## 对象适配器模式
+### 对象适配器模式
 
    与类的适配器模式不同的是，对象适配器模式不是使用对象关系连接到Adapter,而是使用委派方式把关联类的对象委派到Adapter中
 
@@ -75,7 +75,7 @@ public class Adapter {
 }
 ```
 
-## 类适配器和对象适配器的使用场景
+### 类适配器和对象适配器的使用场景
 
 ●　　类适配器使用对象继承的方式，是静态的定义方式；而对象适配器使用对象组合的方式，是动态组合的方式。
 
@@ -93,7 +93,7 @@ public class Adapter {
 
 建议尽量使用对象适配器的实现方式，多用合成/聚合、少用继承。当然，具体问题具体分析，根据需要来选用实现方式，最适合的才是最好的。
 
-## Android中适配器模式的使用
+### Android中适配器模式的使用
 
    Android中最常见的适配器模式便是ListView对应的Adapter了
 
@@ -179,13 +179,14 @@ public abstract class AbsListView extends AdapterView<ListAdapter>
 因为Item View和数据类型千变万化，Android的架构师们将这些变化的部分交给用户来处理，通过getCount、getItem、getView等几个方法抽象出来，也就是将Item View的构造过程交给用户来处理，灵活地运用了适配器模式，达到了无限适配、拥抱变化的目的。
 
 # 外观模式（Facade Pattern）
-   外部与一个子系统通信，必须通过一个统一的外观对象进行。
+
+   **外部与一个子系统通信，必须通过一个统一的外观对象进行。**
 
 ![avatar](/image/Facde_sample.png)
 
 **外观角色类:**
 
-## 外观模式示例
+### 外观模式示例
 ```
 public class Facade {
     //示意方法，满足客户端需要的功能
@@ -216,7 +217,7 @@ public class Client {
 
   **使用外观模式还有一个附带的好处，就是能够有选择性地暴露方法**
 
-## 文件读取-文件加密-文件写入新文件
+### 文件读取-文件加密-文件写入新文件
 
 **EncryptFacade：加密外观类，充当外观类**
 
@@ -259,7 +260,7 @@ class Program
     }
 ```
 
-## 外观模式的优点
+### 外观模式的优点
 ●　　松散耦合
 
 外观模式松散了客户端与子系统的耦合关系，让子系统内部的模块能更容易扩展和维护。
@@ -280,8 +281,93 @@ class Program
    装饰者模式动态地将责任附加到对象身上。若要扩展功能，装饰者提供了比继承者更有弹性的替代方案
 
    装饰者模式可以在不使用传教更多的子类的情况下，将对象的功能加以扩展。
+   
+   用一个新类（包装类）来包装功能类，即新类持有功能类的引用，并且在新类中科院扩展功能类功能，**包装类跟功能类实现了同一个接口**，但抽象接口方法最终是在功能类中实现，包装类来实现调用和扩展功能类方法
+
+```
+public class RedShapeDecorator extends ShapeDecorator {
+ 
+   public RedShapeDecorator(Shape decoratedShape) {
+      super(decoratedShape);     
+   }
+ 
+   @Override
+   public void draw() {
+      decoratedShape.draw();         
+      setRedBorder(decoratedShape);
+   }
+ 
+   private void setRedBorder(Shape decoratedShape){
+      System.out.println("Border Color: Red");
+   }
+}
+```
 
 # 代理模式(Proxy)
 
+### 代理模式定义
+
+  给某一个对象提供一个代 理，并由代理对象控制对原对象的引用
+
+  **代理模式包含如下角色：**
+
+ 1. Subject: 抽象主题角色： 代理类和真实实现类都继承的接口
+ 
+ 2. Proxy: 代理主题角色，持有真实代理类的引用。
+ 
+ 3. RealSubject: 真实主题角色，真实实现功能的类
+ 
+   **抽象对象角色**
+ 
+ ```
+ public abstract class AbstractObject {
+     //操作
+     public abstract void operation();
+ }
+```
+ 
+   **目标对象角色**
+   
+``` 
+ public class RealObject extends AbstractObject {
+     @Override
+     public void operation() {
+         //一些操作
+         System.out.println("一些操作");
+     }
+ }
+```
+ 
+  **代理对象角色**
+ 
+```
+ public class ProxyObject extends AbstractObject{
+     RealObject realObject = new RealObject();
+     @Override
+     public void operation() {
+         //调用目标对象之前可以做相关操作
+         System.out.println("before");        
+         realObject.operation();        
+         //调用目标对象之后可以做相关操作
+         System.out.println("after");
+     }
+ }
+```
+ 
+  **客户端**
+ 
+```
+ public class Client {
+     public static void main(String[] args) {
+         AbstractObject obj = new ProxyObject();
+         obj.operation();
+     }
+ }
+```
+### 优缺点
+  **优点**
+     给对象增加了本地化的扩展性，增加了存取操作控制
+  **缺点**
+     会产生多余的代理类
 
 
