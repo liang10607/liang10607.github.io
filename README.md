@@ -19,6 +19,10 @@
 
 [线性数据结构](/data_structs/data_structs_line.md)
 
+[栈,队列，堆](/data_structs/stack_and_queue.md)
+
+[树](/data_structs/tree.md)
+
 ### 设计模式
 
 [创建型](/design_model/Creational_Pattern.md)
