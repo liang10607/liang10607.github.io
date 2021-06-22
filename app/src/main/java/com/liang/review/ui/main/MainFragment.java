@@ -18,6 +18,7 @@ import com.liang.review.R;
 import com.liang.review.beans.CloneTest;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class MainFragment extends Fragment {
 
@@ -38,43 +39,7 @@ public class MainFragment extends Fragment {
         } catch (CloneNotSupportedException e) {
             e.printStackTrace();
         }
-        ArrayList a =new ArrayList()
-                a.clear();
-        // 创建一个子线程，并在子线程中创建一个Handler，且重写handleMessage
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Looper.prepare();
-                subHandler = new Handler() {
-                    @Override
-                    public void handleMessage(Message msg) {
-                        super.handleMessage(msg);
-                        // 处理消息
-                        switch (msg.what) {
-                            case MSG_MAIN_TO_SUB:
-                                Log.e(TAG, "接收到消息： " +  Thread.currentThread().getName() + ","+ msg.obj);
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                };
-                Looper.loop();
-            }
-        }).start();
-
-        btnSendToSubThread = (Button) findViewById(R.id.btn_sendto_subthread);
-        btnSendToSubThread.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Message msg = Message.obtain();
-                msg.what = MSG_MAIN_TO_SUB;
-                msg.obj = "这是一个来自主线程的消息";
-                // 主线程中发送消息
-                subHandler.sendMessage(msg);
-            }
-        });
-
+        LinkedList linkedList = new LinkedList();
         return inflater.inflate(R.layout.main_fragment, container, false);
     }
 

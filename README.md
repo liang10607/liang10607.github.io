@@ -2,8 +2,6 @@
 
 ### Java基础
 
-[Java基础](/java_base/java_stuct.md)
-
 [Java高级特性：泛型，反射，注解](/java_base/Java_high_feature.md)
 
 [Java IO和文件](/java_base/JavaIO.md)
@@ -14,11 +12,12 @@
 
 [Java虚拟机](/java_base/java_jvm.md)
 
-### Android基础
 
-[Activity全解析](/Android_base/Activity.md)
+### 数据结构练习
 
+[Java数据结构](/data_structs/java_stuct.md)
 
+[线性数据结构](/data_structs/data_structs_line.md)
 
 ### 设计模式
 
@@ -28,9 +27,14 @@
 
 [行为型](/design_model/behavior_model.md)
 
+
 ### 算法练习
 
 [常见题](/algorithm/common_algorithm.md)
+
+### Android基础
+
+[Activity全解析](/Android_base/Activity.md)
 
 ### 文档搜罗
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
