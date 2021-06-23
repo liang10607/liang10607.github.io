@@ -21,7 +21,10 @@
 
 [栈,队列，堆](/data_structs/stack_and_queue.md)
 
-[树](/data_structs/tree.md)
+[树](/data_structs/tree_base.md)
+
+[其他树](/data_structs/tree_other.md)
+
 
 ### 设计模式
 
