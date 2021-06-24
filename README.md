@@ -25,6 +25,11 @@
 
 [其他树](/data_structs/tree_other.md)
 
+[Hash查找](/data_structs/hash_query.md)
+
+[排序算法](/data_structs/sort_struct.md)
+
+
 
 ### 设计模式
 
