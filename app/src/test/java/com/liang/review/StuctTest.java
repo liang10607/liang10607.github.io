@@ -80,19 +80,24 @@ public class StuctTest {
     // 修改于 2019-03-06
     private int[] shellSort(int[] arr) {
         int len = arr.length;
+        int count=0;
         for(int gap = Math.abs(len / 2); gap > 0; gap = Math.abs(gap / 2)) {
             // 注意：这里和动图演示的不一样，动图是分组执行，实际操作是多个分组交替执行
+//        int gap =1;
             System.out.print("分组Gap:"+gap +"\n");
+
             for(int i = gap; i < len; i++) {
                 int j = i;
                 int current = arr[i];
                 while(j - gap >= 0 && current < arr[j - gap]) {
                     arr[j] = arr[j - gap];
                     j = j - gap;
+                    count ++ ;
                 }
                 arr[j] = current;
             }
         }
+        System.out.println("交换次数：--"+count);
         return arr;
     }
 
