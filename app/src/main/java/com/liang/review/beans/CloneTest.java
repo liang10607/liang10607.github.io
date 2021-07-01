@@ -1,5 +1,7 @@
 package com.liang.review.beans;
 
+import java.util.HashMap;
+
 import androidx.annotation.NonNull;
 
 /**
@@ -11,6 +13,7 @@ public class CloneTest implements Cloneable{
     @NonNull
     @Override
     public Object clone() throws CloneNotSupportedException {
+        HashMap map = new HashMap(3);
         return super.clone();
     }
 }
