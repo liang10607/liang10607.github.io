@@ -45,8 +45,7 @@
 
 ![avatar](/image/http_response_struct.png)
 
-
-
+# 3. Http各个协议版本异同
 
 
 
