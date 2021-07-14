@@ -155,4 +155,4 @@
 
 # **10 内存管理**
 
-(见页面)[https://github.com/LRH1993/android_interview/blob/master/operating-system/memory-management.md]
+[见页面](https://github.com/LRH1993/android_interview/blob/master/operating-system/memory-management.md)
