@@ -40,11 +40,15 @@
 [行为型](/design_model/behavior_model.md)
 
 
-### 计算机网络
+### 操作系统和计算机网络
+
+[操作系统知识](computer_tech/couputer_base.md)
 
 [TCP/IP](/network/TcpIp.md)
 
 [Http协议](/network/http_agreement.md)
+
+[Https协议](/network/https_agreement.md)
 
 
 ### 算法练习
@@ -61,8 +65,18 @@
 
 [ContentProvider全解析](/Android_base/ContentProvider.md)
 
+[Android的Handler消息机制](/Android_base/Handler_mechanism.md)
+
+[Android的Handler消息机制](/Android_base/touch_event_dispatch.md)
+
+[AsynTask全解析](/Android_base/AsynTask.md)
+
+[HandlerThread全解析](/Android_base/HandlerThread.md)
+
+[IntentService全解析](/Android_base/IntentService.md)
 
 ### 文档搜罗
+
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
 
 [Java](https://www.cnblogs.com/crazymakercircle/p/14323919.html)
@@ -74,11 +88,13 @@
 [基础题](https://github.com/LRH1993/android_interview)
 
 ### 日记
+
 [随手记](/Diary/5-13.md)
 
 
 
 ## 在线文件
+
 [Intro.pdf](/Files/Java_JVM_II.pdf)
 
 
