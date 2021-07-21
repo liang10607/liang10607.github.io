@@ -45,6 +45,14 @@ static final int hash(Object key) {
 }
 ```
 
+**HashMap**的死锁问题分析
+
+Hashtable是线程安全的，但效率不高
+
+当需要多线程操作的时候可以使用线程安全的ConcurrentHashMap。
+
+ConcurrentHashMap虽然也是线程安全的，但是它的效率比Hashtable要高好多倍。因为ConcurrentHashMap使用了分段锁，并不对整个数据进行锁定。
+
 ### LinkedHashMap
 1. 集成自HashMap,具有HashMap所有功能，但比HashMap多了一个双向链表存储EntrySet,保持数据(Value)的有序性
 2. 对HashMap的EntrySet进行访问，插入，删除操作，都会重新排需那个双向链表，重要的函数主要包括：
