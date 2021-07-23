@@ -89,7 +89,7 @@
 
 ### 日记
 
-[随手记](/Diary/5-13.md)
+[VM总结](/summery/vm_app_summery.md)
 
 
 
