@@ -53,5 +53,8 @@ dependencies {
 
     supportLibs.each {k,v -> api v}
 
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3'
+
 
 }
