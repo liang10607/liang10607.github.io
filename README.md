@@ -75,6 +75,23 @@
 
 [IntentService全解析](/Android_base/IntentService.md)
 
+[Android虚拟机](/Android_base/android_dalvik.md)
+
+[Android UI层次结构](/Android_base/android_ui_struct.md)
+
+[LruCache原理](/Android_base/LruCache.md)
+
+[事件分发机制](/Android_base/touch_event_dispatch.md)
+
+### Android进阶
+
+[Android热修复](/android_upup/android_hotfix.md)
+
+[Android性能优化](/android_upup/couputer_perform_opt.md)
+
+[Android加固](/android_upup/android_jiagu.md)
+
+
 ### 文档搜罗
 
 [Java的30道笔试题](https://www.cnblogs.com/lanxuezaipiao/p/3371224.html)
