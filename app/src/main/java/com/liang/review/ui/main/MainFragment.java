@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.liang.review.ClientApplication;
 import com.liang.review.R;
 import com.liang.review.beans.CloneTest;
 
@@ -24,6 +25,12 @@ public class MainFragment extends Fragment {
 
     private MainViewModel mViewModel;
     private Handler subHandler;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ClientApplication.getRefWatcher(getActivity()).watch(this);
+    }
 
     public static MainFragment newInstance() {
         return new MainFragment();
