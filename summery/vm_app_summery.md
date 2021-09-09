@@ -62,3 +62,48 @@ byte_count
 
 # 3. 长远规划
 
+
+StringBuffer StringBuilder 区别 线程安全
+
+des aes
+
+app cpu监控  内存监控
+
+PreShareference  是否可以跨进程通信
+
+自旋锁 互斥锁
+
+设计模式
+
+app安全
+
+app保活
+
+app数据安全 加固  混淆  JNI技术
+
+HashMap和HastTable的区别
+
+Hashmap的数据结构情况
+
+Handler
+
+ 总结个人优势
+
+ 1. 问题驱动，设计和开发各种技术问题解决方案
+
+ 2. 架构设计
+
+ 3.
+
+ 总结常用的算法解题思路
+
+ 1. HashMap
+
+ 2. 双指针
+
+ 3. Stack
+
+ 4. 滑动时间窗口
+
+ 5.
+
