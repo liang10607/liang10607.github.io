@@ -58,5 +58,42 @@ tcl
 11. 项目上的技术安全是怎么做的：网络安全，资金安全，隐私安全等等
 12. Mqtt长连接的原理，qos怎么设置的，选择mqtt的原因
 
+
+货拉拉
+一面：
+StringBuffer StringBuilder 区别 线程安全
+des aes
+app cpu监控  内存监控
+PreShareference  是否可以跨进程通信，怎么进行缓存的跨进程操作
+自旋锁 互斥锁
+设计模式
+app安全
+app保活
+app数据安全 加固  混淆  JNI技术
+HashMap和HastTable的区别
+Hashmap的数据结构情况
+Handler
+wait和sheep的区别
+
+二面：
+哪些类可以作为GcRoot对象
+插件化怎么实现的，未在manifast中中注册的Activity是怎么处理的：hook
+Apk安装过程
+dagger2  inject  privider使用场景
+AMS
+PMS
+View的粘性事件处理
+kotlin中的let wait方法使用区别
+组件化  ARouter原理
+性能监控
+Sychronzie高版本的优化有哪些
+AQS是否了解
+设计模式
+性能优化监控
+做过哪些性能优化
+Kotlin的协程怎么做同步
+HashMap数据结构原理
+
+
 ## 二. 分问题解答
 ### 1. JVM垃圾回收机制
