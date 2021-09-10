@@ -77,20 +77,22 @@ wait和sheep的区别
 
 二面：
 哪些类可以作为GcRoot对象
+Activity启动流程
 插件化怎么实现的，未在manifast中中注册的Activity是怎么处理的：hook
 Apk安装过程
 dagger2  inject  privider使用场景
 AMS
 PMS
 View的粘性事件处理
+ViewModel源码 其内部实现机制
+生产消费者模型
 kotlin中的let wait方法使用区别
 组件化  ARouter原理
 性能监控
 Sychronzie高版本的优化有哪些
 AQS是否了解
 设计模式
-性能优化监控
-做过哪些性能优化
+性能优化监控,做过哪些性能优化,省电优化怎么做
 Kotlin的协程怎么做同步
 HashMap数据结构原理
 
